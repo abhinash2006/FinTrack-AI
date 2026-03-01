@@ -60,7 +60,10 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation("com.airbnb.android:lottie-compose:6.3.0")
     implementation(libs.androidx.material3)
+    implementation("androidx.core:core-splashscreen:1.0.1") // Add this line
+    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.material)
     // Added for Material3 themes

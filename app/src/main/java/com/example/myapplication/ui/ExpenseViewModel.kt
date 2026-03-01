@@ -117,4 +117,15 @@ class ExpenseViewModel @Inject constructor(
             else -> "General"
         }
     }
+    fun addManualExpense(title: String, amount: Double, category: String) {
+        viewModelScope.launch {
+            val newExpense = ExpenseEntity(
+                title = title,
+                amount = amount,
+                category = category,
+                date = System.currentTimeMillis()
+            )
+            repository.insertExpense(newExpense)
+        }
+    }
 }

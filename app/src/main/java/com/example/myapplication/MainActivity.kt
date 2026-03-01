@@ -7,11 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.myapplication.ui.AuthScreen
 import com.example.myapplication.ui.ExpenseScreen
 import com.example.myapplication.ui.ExpenseViewModel
@@ -25,13 +22,20 @@ class MainActivity : ComponentActivity() {
     private val viewModel: ExpenseViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        // Logic: Keep splash screen visible until user data is fetched
+        var keepSplashScreen = true
+        window.decorView.postDelayed({ keepSplashScreen = false }, 2000)
+
+        splashScreen.setKeepOnScreenCondition { keepSplashScreen }
+
         enableEdgeToEdge()
 
         setContent {
             var isDarkTheme by remember { mutableStateOf(false) }
 
-            // Logic: Create the launcher to handle Google Sign-In result
             val authLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.StartActivityForResult()
             ) { result ->
@@ -44,7 +48,6 @@ class MainActivity : ComponentActivity() {
                 val user by viewModel.user.collectAsState()
 
                 if (user == null) {
-                    // Pass the launcher to the AuthScreen logic
                     AuthScreen(onGoogleSignIn = {
                         authLauncher.launch(viewModel.authRepository.getSignInIntent())
                     })
