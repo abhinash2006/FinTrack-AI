@@ -1,6 +1,7 @@
 package com.example.myapplication.data
 
 import android.content.Context
+import android.util.Log
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -10,22 +11,34 @@ import com.google.android.gms.tasks.Task
 
 class AuthRepository(private val context: Context) {
 
-    // Logic: This creates the settings for Google Sign-In
     private val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestEmail()
-        // PASTE YOUR WEB CLIENT ID BELOW
-        .requestIdToken("1040213731683-8qtlaqveuf1hi72thfrbqcf4ebt6ku7o.apps.googleusercontent.com")
+        .requestIdToken("326288814272-j99cbjlnkkvujuke6km71oib8pntl4gg.apps.googleusercontent.com")
         .build()
 
     private val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(context, gso)
 
     fun getSignInIntent() = googleSignInClient.signInIntent
 
+    fun getCurrentUser(): GoogleSignInAccount? {
+        return GoogleSignIn.getLastSignedInAccount(context)
+    }
+
     fun handleSignInResult(completedTask: Task<GoogleSignInAccount>): GoogleSignInAccount? {
         return try {
-            completedTask.getResult(ApiException::class.java)
+            val account = completedTask.getResult(ApiException::class.java)
+            Log.d("AuthRepository", "Sign-in successful: ${account?.email}")
+            account
         } catch (e: ApiException) {
+            // This is where you will see error code 10 (Developer Error) if SHA-1 is missing
+            Log.e("AuthRepository", "Sign-in failed: status code = ${e.statusCode}, message = ${e.message}")
             null
+        }
+    }
+
+    fun signOut(onComplete: () -> Unit) {
+        googleSignInClient.signOut().addOnCompleteListener {
+            onComplete()
         }
     }
 }

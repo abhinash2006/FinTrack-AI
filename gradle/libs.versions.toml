@@ -18,6 +18,12 @@ mlkitText = "19.0.1"
 camerax = "1.3.2"
 playServicesAuth = "21.0.0"
 
+# --- Testing Versions ---
+junit = "4.13.2"
+androidxTestJunit = "1.2.1"
+espressoCore = "3.6.1"
+androidxTestRunner = "1.6.2"
+
 [libraries]
 # Standard Compose UI Libraries
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -26,10 +32,19 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
+# Testing Libraries
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestJunit" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
 
 # Dependency Injection (Hilt) - Crucial for "Industry-Ready" code
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }

@@ -88,4 +88,14 @@ dependencies {
     // --- Google Play Services Auth ---
     implementation(libs.play.services.auth)
     implementation("androidx.compose.runtime:runtime-livedata:1.6.1")
+
+    // --- TESTING ---
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }

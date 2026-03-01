@@ -24,11 +24,21 @@ class ExpenseViewModel @Inject constructor(
     private val _user = MutableStateFlow<GoogleSignInAccount?>(null)
     val user: StateFlow<GoogleSignInAccount?> = _user.asStateFlow()
 
+    init {
+        // Check if user is already signed in
+        _user.value = authRepository.getCurrentUser()
+    }
+
     fun onSignInResult(account: GoogleSignInAccount?) {
         _user.value = account
     }
 
-    // Logic: We convert the Database Flow into a StateFlow for the Compose UI.
+    fun signOut() {
+        authRepository.signOut {
+            _user.value = null
+        }
+    }
+
     val allExpenses: StateFlow<List<ExpenseEntity>> = repository.getAllExpenses()
         .stateIn(
             scope = viewModelScope,
@@ -53,14 +63,12 @@ class ExpenseViewModel @Inject constructor(
             repository.deleteExpense(expense)
         }
     }
-    // Add this inside your ExpenseViewModel class
+
     fun addVoiceExpense(spokenText: String) {
         viewModelScope.launch {
-            // Simple AI Logic: Find the first number in the spoken sentence
             val amount = spokenText.filter { it.isDigit() }.toDoubleOrNull() ?: 0.0
-
             val newExpense = ExpenseEntity(
-                title = spokenText.take(20) + "...", // Use start of sentence as title
+                title = spokenText.take(20) + "...",
                 amount = amount,
                 category = "Voice Entry",
                 date = System.currentTimeMillis(),
@@ -69,12 +77,11 @@ class ExpenseViewModel @Inject constructor(
             repository.insertExpense(newExpense)
         }
     }
-    // Add this inside your ExpenseViewModel class
+
     fun addScannedExpense(scannedText: String) {
         viewModelScope.launch {
             val amount = Regex("""\d+\.\d+""").find(scannedText)?.value?.toDoubleOrNull() ?: 0.0
-            val category = getSmartCategory(scannedText) // Smart Category Logic
-
+            val category = getSmartCategory(scannedText)
             val newExpense = ExpenseEntity(
                 title = "Scanned: ${scannedText.take(15)}",
                 amount = amount,
@@ -84,7 +91,8 @@ class ExpenseViewModel @Inject constructor(
             repository.insertExpense(newExpense)
         }
     }
-    private val _budgetLimit = MutableStateFlow(5000.0) // Default limit: Rs 5000
+
+    private val _budgetLimit = MutableStateFlow(5000.0)
     val budgetLimit: StateFlow<Double> = _budgetLimit.asStateFlow()
 
     fun updateBudgetLimit(newLimit: Double) {
