@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -62,12 +63,14 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation("com.airbnb.android:lottie-compose:6.3.0")
     implementation(libs.androidx.material3)
-    implementation("androidx.core:core-splashscreen:1.0.1") // Add this line
-    implementation(libs.androidx.core.ktx)
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.material)
-    // Added for Material3 themes
-    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
+
+    // --- FIREBASE ---
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.auth.ktx)
 
     // --- HILT ---
     implementation(libs.hilt.android)
@@ -87,6 +90,9 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+
+    // --- Guava (Fixes ListenableFuture error) ---
+    implementation(libs.guava)
 
     // --- Google Play Services Auth ---
     implementation(libs.play.services.auth)

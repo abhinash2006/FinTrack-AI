@@ -6,4 +6,7 @@ plugins {
     // Add these two lines to register the AI and Dependency Injection engines
     alias(libs.plugins.hilt.android) apply false
     alias(libs.plugins.ksp) apply false
+    
+    // Google services plugin
+    alias(libs.plugins.google.services) apply false
 }
