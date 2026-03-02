@@ -4,7 +4,6 @@ import android.content.Intent
 import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,16 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.myapplication.R
 import com.example.myapplication.data.ReceiptScanner
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +41,7 @@ fun ExpenseScreen(
     var showBudgetDialog by remember { mutableStateOf(false) }
     var newLimitInput by remember { mutableStateOf(currentLimit.toString()) }
 
-    // Manual Entry States (Correctly placed inside Composable)
+    // Manual Entry States
     var showManualDialog by remember { mutableStateOf(false) }
     var manualTitle by remember { mutableStateOf("") }
     var manualAmount by remember { mutableStateOf("") }
@@ -71,7 +66,7 @@ fun ExpenseScreen(
 
     // --- Background Wrapper ---
     Box(modifier = Modifier.fillMaxSize()) {
-        // Gradient Background for a professional feel
+        // Gradient Background
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -93,7 +88,7 @@ fun ExpenseScreen(
             })
         } else {
             Scaffold(
-                containerColor = Color.Transparent, // Transparent to show the background
+                containerColor = Color.Transparent,
                 topBar = {
                     CenterAlignedTopAppBar(
                         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -127,13 +122,15 @@ fun ExpenseScreen(
                                     Text("LOGIN", fontWeight = FontWeight.Bold)
                                 }
                             } else {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.primaryContainer,
-                                    modifier = Modifier.padding(end = 12.dp).size(36.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Text(text = user?.displayName?.take(1) ?: "U", fontWeight = FontWeight.Bold)
+                                IconButton(onClick = { viewModel.signOut() }) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(text = user?.displayName?.take(1) ?: "U", fontWeight = FontWeight.Bold)
+                                        }
                                     }
                                 }
                             }
@@ -212,6 +209,35 @@ fun ExpenseScreen(
                                     manualAmount = ""
                                 }
                             }) { Text("Add") }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showManualDialog = false }) { Text("Cancel") }
+                        }
+                    )
+                }
+
+                // --- Budget Limit Dialog ---
+                if (showBudgetDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showBudgetDialog = false },
+                        title = { Text("Set Budget Limit") },
+                        text = {
+                            OutlinedTextField(
+                                value = newLimitInput,
+                                onValueChange = { newLimitInput = it },
+                                label = { Text("Monthly Limit (Rs)") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
+                        confirmButton = {
+                            Button(onClick = {
+                                val limit = newLimitInput.toDoubleOrNull() ?: currentLimit
+                                viewModel.updateBudgetLimit(limit)
+                                showBudgetDialog = false
+                            }) { Text("Save") }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showBudgetDialog = false }) { Text("Cancel") }
                         }
                     )
                 }
@@ -226,7 +252,10 @@ fun ExpenseScreen(
                 ) {
                     if (expenses.isNotEmpty()) {
                         item {
-                            BudgetStatusHeader(expenses, currentLimit) { showBudgetDialog = true }
+                            BudgetStatusHeader(expenses, currentLimit) { 
+                                newLimitInput = currentLimit.toString()
+                                showBudgetDialog = true 
+                            }
                         }
                         item {
                             Card(
