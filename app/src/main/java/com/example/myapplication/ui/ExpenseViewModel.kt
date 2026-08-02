@@ -2,10 +2,8 @@ package com.example.myapplication.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.data.AuthRepository
 import com.example.myapplication.data.ExpenseEntity
 import com.example.myapplication.domain.ExpenseRepository
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,26 +15,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExpenseViewModel @Inject constructor(
-    private val repository: ExpenseRepository,
-    val authRepository: AuthRepository
+    private val repository: ExpenseRepository
 ) : ViewModel() {
 
-    private val _user = MutableStateFlow<GoogleSignInAccount?>(null)
-    val user: StateFlow<GoogleSignInAccount?> = _user.asStateFlow()
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    init {
-        // Check if user is already signed in
-        _user.value = authRepository.getCurrentUser()
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    fun setLoading(loading: Boolean) {
+        _isLoading.value = loading
     }
 
-    fun onSignInResult(account: GoogleSignInAccount?) {
-        _user.value = account
-    }
-
-    fun signOut() {
-        authRepository.signOut {
-            _user.value = null
-        }
+    fun setError(message: String?) {
+        _errorMessage.value = message
     }
 
     val allExpenses: StateFlow<List<ExpenseEntity>> = repository.getAllExpenses()
