@@ -33,8 +33,9 @@ fun ExpenseScreen(
 ) {
     // --- UI State Management ---
     val expenses by viewModel.allExpenses.collectAsState()
-    val user by viewModel.user.collectAsState()
     val currentLimit by viewModel.budgetLimit.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
     val context = LocalContext.current
 
     var isCameraOpen by remember { mutableStateOf(false) }
@@ -57,11 +58,13 @@ fun ExpenseScreen(
         data?.get(0)?.let { viewModel.addVoiceExpense(it) }
     }
 
-    val authLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        viewModel.onSignInResult(viewModel.authRepository.handleSignInResult(task))
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.setError(null)
+        }
     }
 
     // --- Background Wrapper ---
@@ -84,10 +87,19 @@ fun ExpenseScreen(
         if (isCameraOpen) {
             CameraPreview(onImageCaptured = { uri ->
                 isCameraOpen = false
-                scanner.scanReceipt(uri, { viewModel.addScannedExpense(it) }, { it.printStackTrace() })
+                viewModel.setLoading(true)
+                scanner.scanReceipt(uri, {
+                    viewModel.setLoading(false)
+                    viewModel.addScannedExpense(it)
+                }, {
+                    viewModel.setLoading(false)
+                    viewModel.setError("Failed to scan receipt")
+                    it.printStackTrace()
+                })
             })
         } else {
             Scaffold(
+                snackbarHost = { SnackbarHost(snackbarHostState) },
                 containerColor = Color.Transparent,
                 topBar = {
                     CenterAlignedTopAppBar(
@@ -113,26 +125,6 @@ fun ExpenseScreen(
                                     imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
                                     contentDescription = "Theme"
                                 )
-                            }
-
-                            if (user == null) {
-                                TextButton(onClick = {
-                                    authLauncher.launch(viewModel.authRepository.getSignInIntent())
-                                }) {
-                                    Text("LOGIN", fontWeight = FontWeight.Bold)
-                                }
-                            } else {
-                                IconButton(onClick = { viewModel.signOut() }) {
-                                    Surface(
-                                        shape = CircleShape,
-                                        color = MaterialTheme.colorScheme.primaryContainer,
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Text(text = user?.displayName?.take(1) ?: "U", fontWeight = FontWeight.Bold)
-                                        }
-                                    }
-                                }
                             }
                         }
                     )
@@ -273,6 +265,18 @@ fun ExpenseScreen(
                         ExpenseItem(expense, onDelete = { viewModel.removeExpense(expense) })
                     }
                 }
+            }
+        }
+
+        // Loading Overlay
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         }
     }

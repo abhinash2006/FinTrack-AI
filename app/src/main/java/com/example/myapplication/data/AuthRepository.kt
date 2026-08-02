@@ -5,6 +5,7 @@ import android.util.Log
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.example.myapplication.BuildConfig
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
@@ -13,7 +14,7 @@ class AuthRepository(private val context: Context) {
 
     private val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestEmail()
-        .requestIdToken("326288814272-j99cbjlnkkvujuke6km71oib8pntl4gg.apps.googleusercontent.com")
+        .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
         .build()
 
     private val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(context, gso)
